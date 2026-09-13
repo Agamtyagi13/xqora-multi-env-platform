@@ -122,42 +122,4 @@ Each writes its own report under `logs/<environment>/`.
   `needs:` dependencies so a failure stops all downstream deployments, and
   a GitHub Environment (with required reviewers) gating Production.
 
-## 8. 9-Day build plan (for reference)
 
-| Day | Task |
-|-----|------|
-| 1 | Design architecture and create the demo application |
-| 2 | Containerize the application and configure Docker |
-| 3 | Set up Development, Staging, and Production environments |
-| 4 | Create environment-specific configurations and deployment scripts |
-| 5 | Build the CI/CD pipeline |
-| 6 | Implement versioning and deployment promotion |
-| 7 | Implement Production approval and automated rollback |
-| 8 | Configure monitoring, logging, and deployment reporting |
-| 9 | Perform complete testing, simulate failure, demonstrate rollback, prepare final documentation |
-
-## 9. Expected deliverables checklist
-
-- [x] Complete source code
-- [ ] Git repository link *(push this project and add the link here)*
-- [x] Demo application
-- [x] Dockerfile and Docker Compose configuration
-- [x] Separate Development, Staging, and Production configurations
-- [x] CI/CD pipeline configuration (`pipeline.sh` + GitHub Actions)
-- [x] Deployment automation scripts (`deploy.sh`, `promote.sh`)
-- [x] Version management system (`version-store.js`, `versions.json`)
-- [x] Production approval mechanism (`approve-production.sh`)
-- [x] Rollback scripts (`rollback.sh`)
-- [ ] Monitoring dashboard or screenshots *(run `dashboard.sh` / `monitor.sh`, then screenshot)*
-- [ ] Deployment and rollback logs *(generated under `logs/<env>/` once you run the scripts)*
-- [x] Complete project documentation (`docs/architecture.md`)
-- [x] Architecture diagram (in `docs/architecture.md`)
-- [ ] Screenshots showing deployment across all three environments
-- [ ] Final demonstration video *(see checklist below)*
-
-### Demonstration video checklist
-1. Development → Staging → Production workflow via `pipeline.sh`
-2. Approval gate blocking Production, then `approve-production.sh` unblocking it
-3. A version visibly displayed differently per environment (dashboard.sh)
-4. A failed deployment (e.g. `rollback.sh <env> --simulate-failure`)
-5. Automated rollback restoring the previous stable version, with health verification
