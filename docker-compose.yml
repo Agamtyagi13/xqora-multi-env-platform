@@ -1,0 +1,42 @@
+# docker-compose.yml
+# One template used by ALL three environments. Isolation between
+# environments comes from:
+#   - a distinct project name (-p, set via COMPOSE_PROJECT_NAME per env file)
+#   - a distinct container_name  (per environment)
+#   - a distinct external port   (per environment's .env)
+#   - a distinct network         (per environment)
+# APP_VERSION and BUILD_NUMBER are exported by deploy.sh at deploy time
+# (not stored in the static per-environment .env files), so the same
+# compose file deploys any version to any environment.
+
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+      args:
+        APP_VERSION: ${APP_VERSION:-1.0.0}
+    image: xqora-multi-env-app:${APP_VERSION:-1.0.0}
+    container_name: xqora-app-${ENVIRONMENT:-development}
+    ports:
+      - "${HOST_PORT:-3001}:3000"
+    environment:
+      - APP_VERSION=${APP_VERSION:-1.0.0}
+      - BUILD_NUMBER=${BUILD_NUMBER:-0}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - PORT=3000
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - env-net
+
+networks:
+  env-net:
+    name: xqora-net-${ENVIRONMENT:-development}
+    driver: bridge

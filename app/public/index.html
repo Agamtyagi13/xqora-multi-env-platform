@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>XQORA Multi-Environment Demo</title>
+<style>
+  body { font-family: -apple-system, Arial, sans-serif; max-width: 640px; margin: 50px auto; padding: 0 20px; color: #222; }
+  h1 { color: #1a4d8f; font-size: 22px; }
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: bold; font-size: 13px; color: white; }
+  .env-development { background: #6c757d; }
+  .env-staging { background: #d99a00; }
+  .env-production { background: #1a7f37; }
+  .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; }
+  .big { font-size: 28px; font-weight: bold; margin: 6px 0; }
+  pre { background: #f5f5f5; padding: 10px; border-radius: 6px; overflow-x: auto; }
+</style>
+</head>
+<body>
+  <h1>XQORA Multi-Environment Deployment Demo</h1>
+  <div class="card">
+    <span class="badge" id="envBadge">loading...</span>
+    <div class="big" id="versionText">v-.-.-</div>
+    <div id="buildText">build -</div>
+  </div>
+  <div class="card">
+    <button onclick="show('/health')">Check /health</button>
+    <button onclick="show('/api/info')">Check /api/info</button>
+    <pre id="out">Result will appear here...</pre>
+  </div>
+
+  <script>
+    async function load() {
+      const res = await fetch('/api/info');
+      const data = await res.json();
+      document.getElementById('versionText').textContent = 'v' + data.version;
+      document.getElementById('buildText').textContent = 'Build #' + data.build;
+      const badge = document.getElementById('envBadge');
+      badge.textContent = data.environment.toUpperCase();
+      badge.className = 'badge env-' + data.environment;
+    }
+    async function show(url) {
+      const res = await fetch(url);
+      const data = await res.json();
+      document.getElementById('out').textContent = JSON.stringify(data, null, 2);
+    }
+    load();
+  </script>
+</body>
+</html>

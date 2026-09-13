@@ -1,0 +1,79 @@
+name: CI/CD - XQORA Multi-Environment Deployment
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Application version to deploy'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 1. Code validation
+      - name: Validate application code
+        run: node -c app/server.js
+
+      # 3. Docker image build / 4. Image tagging
+      - name: Build and tag Docker image
+        run: |
+          VERSION="${{ github.event.inputs.version || '1.0.0' }}"
+          docker build -t xqora-multi-env-app:${VERSION} --build-arg APP_VERSION=${VERSION} ./app
+
+      # 2. Application testing
+      - name: Smoke test the built image
+        run: |
+          VERSION="${{ github.event.inputs.version || '1.0.0' }}"
+          docker run -d --name smoke-test -p 9999:3000 -e APP_VERSION=${VERSION} xqora-multi-env-app:${VERSION}
+          for i in $(seq 1 10); do
+            curl -fsS http://localhost:9999/health && break
+            sleep 1
+          done
+          curl -fsS http://localhost:9999/health | grep '"status":"UP"'
+          docker rm -f smoke-test
+
+  deploy-development:
+    needs: validate-and-build
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Development
+        run: |
+          echo "Run ./scripts/deploy.sh development ${{ github.event.inputs.version || '1.0.0' }} on the target host."
+
+  deploy-staging:
+    needs: deploy-development
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Staging
+        run: |
+          echo "Run ./scripts/deploy.sh staging ${{ github.event.inputs.version || '1.0.0' }} on the target host."
+
+  deploy-production:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    # GitHub Environments with required reviewers implement the approval
+    # gate natively - this job will not run until a reviewer approves it
+    # in the GitHub UI, mirroring approve-production.sh locally.
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Production (post-approval)
+        run: |
+          echo "Run ./scripts/deploy.sh production ${{ github.event.inputs.version || '1.0.0' }} on the target host."
+
+  # If any job fails, dependent jobs (deploy-development, deploy-staging,
+  # deploy-production) never run - GitHub Actions' `needs:` dependency
+  # chain enforces "stop the pipeline if any validation stage fails."

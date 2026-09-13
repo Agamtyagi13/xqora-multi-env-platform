@@ -1,0 +1,13 @@
+{
+  "name": "xqora-multi-env-app",
+  "version": "1.0.0",
+  "description": "Demo application for the Multi-Environment Deployment Management System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "lint": "node -c server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

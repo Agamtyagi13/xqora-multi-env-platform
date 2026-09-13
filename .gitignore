@@ -1,0 +1,20 @@
+node_modules/
+package-lock.json
+
+# Runtime-generated state - not checked in, created by setup.sh/scripts
+versions/versions.json
+versions/.last-build-number-*
+approvals/*.approved
+logs/*/*.log
+logs/*/*.txt
+logs/*.log
+logs/*.txt
+dashboard.html
+
+!approvals/.gitkeep
+!logs/development/.gitkeep
+!logs/staging/.gitkeep
+!logs/production/.gitkeep
+
+*.tmp
+*.pid
